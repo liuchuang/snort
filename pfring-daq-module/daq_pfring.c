@@ -115,7 +115,7 @@ static int pfring_daq_open(Pfring_Context_t *context, int id) {
   if(device) {
     if(strncmp(device, "dna", 3) == 0) {
       DPE(context->errbuf, "DNA is not supported by daq_pfring. Please get daq_pfring_dna from http://shop.ntop.org");
-      return(-1);
+      //return(-1);	/*liuchang mod*/
     }
 
     context->pkt_buffer = NULL;
@@ -635,6 +635,7 @@ static int pfring_daq_acquire(void *handle, int cnt, DAQ_Analysis_Func_t callbac
   Pfring_Context_t *context =(Pfring_Context_t *) handle;
   int ret = 0, i, current_ring_idx = context->num_devices - 1, rx_ring_idx, c = 0;
   struct pollfd pfd[DAQ_PF_RING_MAX_NUM_DEVICES];
+  static int no_packet_times=0;
   hash_filtering_rule hash_rule;
 
   memset(&hash_rule, 0, sizeof(hash_rule));
@@ -670,6 +671,14 @@ static int pfring_daq_acquire(void *handle, int cnt, DAQ_Analysis_Func_t callbac
 
     if(ret <= 0) {
       /* No packet to read: let's poll */
+      //liuchuang mod
+      return 0;
+      no_packet_times++;
+      if(no_packet_times<10000){
+        return 0;
+      }
+      no_packet_times=0;
+	    
       int rc;
 
       for (i = 0; i < context->num_devices; i++) {
