@@ -1,0 +1,69 @@
+#!/bin/bash
+
+DAQ=daq-2.0.2/
+PFRING_DAQ=pfring-daq-module/
+DNET=libdnet-1.12/
+SNORT=snort-2.9.6.0/
+
+CDIR(){
+	if [ ! -d $1 ]
+	then
+		mkdir -p $1
+	else
+		echo 'yes'
+	fi
+}
+
+_make(){
+	cd $1
+	./configure
+	make
+	cd -
+}
+
+_make_pfring(){
+	prog_dir=`pwd`
+	cd $1
+	autoreconf -ivf
+	./configure --with-libdaq-includes=$prog_dir/include/daq/ --with-libsfbpf-libraries=$prog_dir/lib/daq/
+	make
+	cd -
+}
+
+_make_snort(){
+	prog_dir=`pwd`
+	cd $1
+	SPATA=/home/liuchuang/git/github/snort/
+	./configure --with-dnet-includes=$prog_dir/include/dnet --with-dnet-libraries=$prog_dir/lib/dnet/ --with-daq-includes=$prog_dir/include/daq/ --with-daq-libraries=$prog_dir/lib/daq/ -disable-static-daq
+	make
+	cd -
+}
+_make $DAQ
+_make $DNET
+
+CDIR include/daq/
+CDIR include/dnet/
+CDIR lib/daq
+CDIR lib/dnet
+CDIR lib/os-daq-modules/
+
+cp $DAQ/api/*.h include/daq/
+cp $DAQ/sfbpf/sfbpf.h include/daq/
+cp $DAQ/sfbpf/sfbpf_dlt.h include/daq/
+cp $DNET/include/*.h include/dnet/
+cp $DNET/include/dnet include/dnet/ -r
+
+cp $DAQ/api/.libs/libdaq.* lib/daq/
+cp $DAQ/os-daq-modules/.libs/*.so lib/os-daq-modules/
+cp $DAQ/sfbpf/.libs/libsfbpf.* lib/daq/
+cp $DNET/src/.libs/libdnet lib/dnet/
+cp $DNET/src/.libs/libdnet.* lib/dnet/
+
+_make_pfring $PFRING_DAQ
+cp $PFRING_DAQ/.libs/daq_pfring.so lib/os-daq-modules/
+
+_make_snort $SNORT
+cp $SNORT/src/dynamic-preprocessors/build/usr/local/lib/snort_dynamicpreprocessor/ lib/ -rf
+cp $SNORT/src/dynamic-plugins/sf_engine/.libs/libsf_engine.so lib/
+touch rules/rules/white_list.rules
+touch rules/rules/black_list.rules
