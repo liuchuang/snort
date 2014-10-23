@@ -929,6 +929,7 @@ typedef struct _SnortConfig
 typedef struct _PacketCount
 {
     uint64_t total_from_daq;
+    uint64_t total_from_daq_bytes;
     uint64_t total_processed;
 
     uint64_t s5tcp1;

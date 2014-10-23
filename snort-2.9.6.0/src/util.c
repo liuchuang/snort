@@ -1026,6 +1026,7 @@ void TimeStop (void)
     uint32_t days = 0, hrs = 0, mins = 0, secs = 0;
     uint32_t total_secs = 0, tmp = 0;
     uint64_t pps = 0;
+    uint64_t bps = 0;
 
     struct timeval endtime, difftime;
     gettimeofday(&endtime, NULL);
@@ -1072,7 +1073,10 @@ void TimeStop (void)
     }
 
     pps = (pc.total_from_daq / total_secs);
+    //liuchuang add
+    bps = (pc.total_from_daq_bytes*8 / total_secs/1024/1024);
     LogCount("Pkts/sec", pps);
+    LogCount("MBit/sec", bps);
 }
 
 //-------------------------------------------------------------------------

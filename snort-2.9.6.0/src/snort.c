@@ -1649,6 +1649,7 @@ static DAQ_Verdict PacketCallback(
     }
 
     pc.total_from_daq++;
+    pc.total_from_daq_bytes+=pkthdr->pktlen;
 
     /* Increment counter that we're evaling rules for caching results */
     rule_eval_pkt_count++;
